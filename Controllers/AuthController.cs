@@ -1,10 +1,8 @@
-﻿using System.Security.Claims;
-using System.Text;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Mvc;
 using ProjectWork.Data;
 using ProjectWork.DTO;
 using ProjectWork.Models;
+using ProjectWork.Services;
 
 namespace ProjectWork.Controllers;
 
@@ -13,10 +11,11 @@ namespace ProjectWork.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
-    private readonly string _jwtKey = "Q9zXp7!pRt*DkL#3vU1&nE$zXyGmT@64";
-    public AuthController(AppDbContext context)
+    private readonly IJwtService _jwtService;
+    public AuthController(AppDbContext context, IJwtService jwtService)
     {
         _context = context;
+        _jwtService = jwtService;
     }
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto user)
@@ -57,22 +56,7 @@ public class AuthController : ControllerBase
             return Unauthorized("Credenziali non valide.");
         }
         // Genera un token JWT (semplificato, senza libreria JWT)
-        var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_jwtKey);
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Username)
-            }),
-            Expires = DateTime.UtcNow.AddHours(1),
-            SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha256Signature)
-        };
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        var tokenString = tokenHandler.WriteToken(token);
-        return Ok(new { Token = tokenString });
+        var token = _jwtService.GenerateToken(user);
+        return Ok(new { Token = token });
     }
 }
