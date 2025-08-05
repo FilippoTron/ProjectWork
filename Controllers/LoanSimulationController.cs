@@ -10,22 +10,29 @@ namespace ProjectWork.Controllers;
 [Route("api/[controller]")]
 public class LoanSimulationController : ControllerBase
 {
+    private readonly ILoanRequestService _loanRequestService;
+    private readonly LoanCalculator loanCalculator;
+    public LoanSimulationController(ILoanRequestService loanRequestService, LoanCalculator loanCalculator)
+    {
+        _loanRequestService = loanRequestService;
+        this.loanCalculator = loanCalculator;
+    }
     [HttpPost("simulate")]
     public IActionResult SimulateLoan([FromBody] SimulationRequestDto request)
     {
-        if (request == null || request.Importo <= 0 || request.TassoInteresse < 0 || request.Durata <= 0)
+        if (request == null || request.Importo <= 0 || request.Durata <= 0)
         {
-            return BadRequest("Dati di richiesta non validi.");
+            return BadRequest(new { message = "Dati di richiesta non validi." });
         }
         try
         {
-            var loanCalculator = new LoanCalculator();
-            var rataMensile = loanCalculator.CalcoloRata(request.Importo, request.TassoInteresse, request.Durata);
+            var calcoloTasso = _loanRequestService.CalcoloTassoInteresse(request.Importo, request.Durata);
+            var rataMensile = loanCalculator.CalcoloRata(request.Importo, calcoloTasso, request.Durata);
             return Ok(new { RataMensile = rataMensile });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Errore durante il calcolo della rata: {ex.Message}");
+            return StatusCode(500, new { message = $"Errore durante il calcolo della rata: {ex.Message}" });
         }
     }
 }

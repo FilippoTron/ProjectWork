@@ -1,0 +1,72 @@
+﻿using Microsoft.EntityFrameworkCore;
+using ProjectWork.Data;
+using ProjectWork.DTO;
+using ProjectWork.Models;
+
+namespace ProjectWork.Services;
+
+public class LoanRequestService : ILoanRequestService
+{
+    private readonly AppDbContext _context;
+
+    public LoanRequestService(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<IEnumerable<LoanRequest>> GetAllLoanRequestsAsync()
+    {
+        var loanRequests = await _context.LoanRequests.ToListAsync();
+        return loanRequests;
+    }
+
+    public Task<LoanRequest> GetLoanRequestByIdAsync(int id)
+    {
+        var loanRequest = _context.LoanRequests
+            .Include(lr => lr.User)
+            .FirstOrDefaultAsync(lr => lr.Id == id);
+        if (loanRequest == null)
+        {
+            throw new KeyNotFoundException($"Loan request with ID {id} not found.");
+        }
+        return loanRequest;
+    }
+
+    public async Task<bool> SubmitLoanRequestAsync(LoanRequestDto requestDto, int userId)
+    {
+        if (requestDto.Importo <= 0 || requestDto.Durata <= 0)
+            throw new ArgumentException("Importo e durata devono essere maggiori di zero.");
+
+        var tassoInteresse = CalcoloTassoInteresse(requestDto.Importo, requestDto.Durata);
+        var loanRequest = new LoanRequest
+        {
+            UserId = userId,
+            Importo = requestDto.Importo,
+            TassoInteresse = tassoInteresse,
+            Durata = requestDto.Durata,
+            Status = "In attesa",
+            DataRichiesta = DateTime.UtcNow
+        };
+        _context.LoanRequests.Add(loanRequest);
+        await _context.SaveChangesAsync();
+        return true;
+
+    }
+
+    public Task<bool> UpdateLoanRequestStatusAsync(int id, string status)
+    {
+        throw new NotImplementedException();
+    }
+
+    public double CalcoloTassoInteresse(double importo, int durata)
+    {
+        if (importo <= 0 || durata <= 0)
+            throw new ArgumentException("Importo e durata devono essere maggiori di zero.");
+        else if (importo <= 5000 && durata <= 12)
+            return 3.5; // 5% interest for small loans
+        else if (importo <= 10000 && durata <= 24)
+            return 5.0;
+        else
+            return 6.5;
+    }
+}

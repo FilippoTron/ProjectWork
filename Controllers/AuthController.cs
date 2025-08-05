@@ -35,7 +35,8 @@ public class AuthController : ControllerBase
         {
             Username = user.Username,
             Email = user.Email,
-            Password = user.Password // In un'applicazione reale, la password dovrebbe essere crittografata
+            Password = user.Password,
+            Role = "User",
         };
         // Aggiungi il nuovo utente al database
         _context.Users.Add(newUser);
@@ -57,6 +58,6 @@ public class AuthController : ControllerBase
         }
         // Genera un token JWT (semplificato, senza libreria JWT)
         var token = _jwtService.GenerateToken(user);
-        return Ok(new { Token = token });
+        return Ok(new { token = token });
     }
 }
