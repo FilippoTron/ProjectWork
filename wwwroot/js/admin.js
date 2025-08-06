@@ -39,13 +39,15 @@ function renderTable(data) {
     }
 
     data.forEach(r => {
+        const username = r.user?.username || "Utente sconosciuto";
+        const rataMensile = (r.importo / r.durata).toFixed(2);
         const tr = document.createElement("tr");
         tr.innerHTML = `
       <td>${r.id}</td>
-      <td>${r.username}</td>
-      <td>€ ${r.amount}</td>
-      <td>${r.durationMonths}</td>
-      <td>€ ${r.monthlyRate}</td>
+      <td>${username}</td>
+      <td>€ ${r.importo}</td>
+      <td>${r.durata}</td>
+      <td>€ ${rataMensile}</td>
       <td>${r.status}</td>
       <td>
         <button class="btn btn-success btn-sm me-1" onclick="updateStatus(${r.id}, 'Approvata')">✔</button>

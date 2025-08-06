@@ -18,7 +18,7 @@ public class LoanRequestController : ControllerBase
     }
     [Authorize(Roles = "User")]
     [HttpPost("submit")]
-    public async Task<IActionResult> SubmitLoanRequest([FromBody] LoanRequestDto requestDto)
+    public async Task<IActionResult> SubmitLoanRequest([FromBody] SubmitRequestDto requestDto)
     {
         if (requestDto == null || requestDto.Importo <= 0 || requestDto.Durata <= 0)
         {
@@ -27,6 +27,7 @@ public class LoanRequestController : ControllerBase
         try
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
             await loanRequestService.SubmitLoanRequestAsync(requestDto, userId);
             return Ok("Richiesta di prestito inviata con successo.");
         }

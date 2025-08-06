@@ -25,7 +25,6 @@
             const data = await res.json();
             localStorage.setItem("token", data.token);
             const payload = parseJwt(data.token);
-            console.log("Payload:", payload);
             if (payload.role === "Admin") {
                 window.location.href = "admin.html";
             } else {

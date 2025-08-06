@@ -14,9 +14,25 @@ public class LoanRequestService : ILoanRequestService
         _context = context;
     }
 
-    public async Task<IEnumerable<LoanRequest>> GetAllLoanRequestsAsync()
+    public async Task<IEnumerable<LoanRequestDto>> GetAllLoanRequestsAsync()
     {
-        var loanRequests = await _context.LoanRequests.ToListAsync();
+        var loanRequests = await _context.LoanRequests.
+            Include(r => r.User)
+            .Select(r => new LoanRequestDto
+            {
+                Id = r.Id,
+                UserId = r.UserId,
+                User = new UserDto
+                {
+                    Username = r.User.Username,
+                    Email = r.User.Email
+                },
+                Importo = r.Importo,
+                TassoInteresse = r.TassoInteresse,
+                Durata = r.Durata,
+                Status = r.Status,
+                DataRichiesta = r.DataRichiesta
+            }).ToListAsync();
         return loanRequests;
     }
 
@@ -32,7 +48,7 @@ public class LoanRequestService : ILoanRequestService
         return loanRequest;
     }
 
-    public async Task<bool> SubmitLoanRequestAsync(LoanRequestDto requestDto, int userId)
+    public async Task<bool> SubmitLoanRequestAsync(SubmitRequestDto requestDto, int userId)
     {
         if (requestDto.Importo <= 0 || requestDto.Durata <= 0)
             throw new ArgumentException("Importo e durata devono essere maggiori di zero.");
