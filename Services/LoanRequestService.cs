@@ -69,9 +69,17 @@ public class LoanRequestService : ILoanRequestService
 
     }
 
-    public Task<bool> UpdateLoanRequestStatusAsync(int id, string status)
+    public async Task<bool> UpdateLoanRequestStatusAsync(int id, string status)
     {
-        throw new NotImplementedException();
+        var loanRequest = await _context.LoanRequests.FirstOrDefaultAsync(lr => lr.Id == id);
+        if (loanRequest == null)
+        {
+            throw new KeyNotFoundException($"Loan request with ID {id} not found.");
+        }
+        loanRequest.Status = status;
+        _context.LoanRequests.Update(loanRequest);
+        await _context.SaveChangesAsync();
+        return true;
     }
 
     public double CalcoloTassoInteresse(double importo, int durata)
