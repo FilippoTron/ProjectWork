@@ -5,45 +5,65 @@ if (!token) {
 
 const payload = parseJwt(token);
 
+const statusColors = {
+    "Approvato": "success",
+    "Rifiutato": "danger",
+    "In Attesa": "warning"
+};
+
 async function fetchLoans() {
+    const spinner = document.getElementById("loadingSpinner");
+    const errorMsg = document.getElementById("errorMsg");
+    const tbody = document.getElementById("loanTableBody");
+
+    spinner.classList.remove("d-none");
+    errorMsg.innerHTML = "";
+    tbody.innerHTML = "";
+
     try {
         const res = await fetch(`${apiUrl}/api/LoanRequest/user/`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
+            headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (!res.ok) throw new Error("Errore durante il recupero delle richieste");
+        if (!res.ok) throw new Error("Errore durante il recupero delle richieste.");
 
         const loans = await res.json();
-        const tbody = document.getElementById("loanTableBody");
-        tbody.innerHTML = "";
-
-        if (loans.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Nessuna richiesta trovata.</td></tr>`;
-            return;
-        }
 
         loans.forEach(loan => {
             const row = document.createElement("tr");
+
+            const statusClass = statusColors[loan.status] || "secondary";
+
             row.innerHTML = `
-                <td>${loan.id}</td>
-                <td>€ ${loan.importo.toFixed(2)}</td>
-                <td>${loan.durata} mesi</td>
-                <td>${loan.status}</td>
-                <td>${new Date(loan.dataRichiesta).toLocaleDateString()}</td>
-            `;
+                        <td>${loan.id}</td>
+                        <td><strong>€ ${loan.importo.toFixed(2)}</strong></td>
+                        <td>${loan.durata} mesi</td>
+                        <td><span class="badge bg-${statusClass}">${loan.status}</span></td>
+                        <td>
+                            <span data-bs-toggle="tooltip" title="${new Date(loan.dataRichiesta).toLocaleString()}">
+                                ${new Date(loan.dataRichiesta).toLocaleDateString()}
+                            </span>
+                        </td>
+                    `;
             tbody.appendChild(row);
         });
+
+        // Attiva tooltip
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+            new bootstrap.Tooltip(el);
+        });
+
     } catch (err) {
-        document.getElementById("errorMsg").textContent = err.message;
+        errorMsg.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+    } finally {
+        spinner.classList.add("d-none");
     }
 }
 
 function parseJwt(token) {
     try {
         return JSON.parse(atob(token.split('.')[1]));
-    } catch (e) {
+    } catch {
         return null;
     }
 }
@@ -57,9 +77,18 @@ document.getElementById("requestBtn").addEventListener("click", () => {
 });
 
 document.getElementById("logoutBtn").addEventListener("click", () => {
-    localStorage.removeItem("token");
-    window.location.href = "login.html";
+    if (confirm("Sei sicuro di voler uscire?")) {
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
+    }
 });
 
-// Caricamento al primo accesso
+document.getElementById("searchInput").addEventListener("input", function () {
+    const search = this.value.toLowerCase();
+    document.querySelectorAll("#loanTableBody tr").forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(search) ? "" : "none";
+    });
+});
+
 fetchLoans();
