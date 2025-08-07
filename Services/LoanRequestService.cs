@@ -36,16 +36,30 @@ public class LoanRequestService : ILoanRequestService
         return loanRequests;
     }
 
-    public Task<LoanRequest> GetLoanRequestByIdAsync(int id)
+    public async Task<IEnumerable<LoanRequestDto>> GetLoanRequestByIdAsync(int id)
     {
-        var loanRequest = _context.LoanRequests
-            .Include(lr => lr.User)
-            .FirstOrDefaultAsync(lr => lr.Id == id);
-        if (loanRequest == null)
-        {
+        var loanRequest = await _context.LoanRequests
+            .Include(r => r.User)
+            .Where(r => r.UserId == id).ToListAsync();
+        if (loanRequest == null || !loanRequest.Any())
             throw new KeyNotFoundException($"Loan request with ID {id} not found.");
-        }
-        return loanRequest;
+
+        return loanRequest.Select(lr => new LoanRequestDto
+        {
+            Id = lr.Id,
+            UserId = lr.UserId,
+            User = new UserDto
+            {
+                Username = lr.User.Username,
+                Email = lr.User.Email
+            },
+            Importo = lr.Importo,
+            TassoInteresse = lr.TassoInteresse,
+            Durata = lr.Durata,
+            Status = lr.Status,
+            DataRichiesta = lr.DataRichiesta
+
+        });
     }
 
     public async Task<bool> SubmitLoanRequestAsync(SubmitRequestDto requestDto, int userId)

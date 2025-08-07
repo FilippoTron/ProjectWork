@@ -42,6 +42,21 @@ public class LoanRequestController : ControllerBase
 
 
     }
+    [Authorize(Roles = "User")]
+    [HttpGet("user")]
+    public async Task<IActionResult> GetLoanRequestByUserId()
+    {
+        try
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var loanRequest = await loanRequestService.GetLoanRequestByIdAsync(userId);
+            return Ok(loanRequest);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Errore durante il recupero della richiesta di prestito: {ex.Message}");
+        }
+    }
 
     [Authorize(Roles = "Admin")]
     [HttpGet("all")]

@@ -27,7 +27,7 @@ if (loginForm) {
                 const data = await res.json();
                 localStorage.setItem("token", data.token);
                 const payload = parseJwt(data.token);
-                window.location.href = payload.role === "Admin" ? "admin.html" : "loan.html";
+                window.location.href = payload.role === "Admin" ? "admin.html" : "user.html";
             } else {
                 msg.textContent = "Credenziali non valide.";
             }
