@@ -7,7 +7,23 @@ public class LoanRequest
     public User User { get; set; } = null!;
     public double Importo { get; set; }
     public double TassoInteresse { get; set; }
-    public int Durata { get; set; } // Durata in mesi
-    public string Status { get; set; } = "In attesa"; // Esempio: "In attesa", "Approvato", "Rifiutato"
+    public int Durata { get; set; }
+    public TipoPrestito TipoPrestito { get; set; }
+    public Status Status { get; set; }
     public DateTime DataRichiesta { get; set; } = DateTime.UtcNow;
+}
+
+public enum TipoPrestito
+{
+    Personale,
+    Veicolo,
+    Abitazione,
+    Altro
+}
+
+public enum Status
+{
+    Pendente,
+    Approvata,
+    Rifiutata
 }

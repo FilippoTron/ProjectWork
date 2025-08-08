@@ -8,7 +8,7 @@ const payload = parseJwt(token);
 const statusColors = {
     "Approvato": "success",
     "Rifiutato": "danger",
-    "In Attesa": "warning"
+    "Pendente": "warning"
 };
 
 async function fetchLoans() {

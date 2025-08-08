@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectWork.Data;
+using ProjectWork.Models;
 
 namespace ProjectWork.Controllers;
 
@@ -46,7 +47,7 @@ public class AdminLoanController : ControllerBase
         {
             return NotFound("Richiesta di prestito non trovata.");
         }
-        request.Status = "Approvato";
+        request.Status = Status.Approvata;
         _context.SaveChanges();
         return Ok("Richiesta di prestito approvata.");
     }
@@ -58,7 +59,7 @@ public class AdminLoanController : ControllerBase
         {
             return NotFound("Richiesta di prestito non trovata.");
         }
-        request.Status = "Rifiutato";
+        request.Status = Status.Rifiutata;
         _context.SaveChanges();
         return Ok("Richiesta di prestito rifiutata.");
     }

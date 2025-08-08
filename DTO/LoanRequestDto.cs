@@ -1,4 +1,6 @@
-﻿namespace ProjectWork.DTO;
+﻿using ProjectWork.Models;
+
+namespace ProjectWork.DTO;
 
 public class LoanRequestDto
 {
@@ -8,7 +10,7 @@ public class LoanRequestDto
     public double Importo { get; set; } // Importo del prestito
     public double TassoInteresse { get; set; } // Tasso di interesse applicato al prestito
     public int Durata { get; set; } // Durata del prestito in mesi
-    public string Status { get; set; } = "";
+    public Status Status { get; set; }
     public DateTime DataRichiesta { get; set; } // Data della richiesta di prestito
 }
 

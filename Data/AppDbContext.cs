@@ -12,6 +12,9 @@ public class AppDbContext : DbContext
     {
         // Configurazioni specifiche del modello, se necessarie
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<LoanRequest>()
+            .Property(lr => lr.Status)
+            .HasConversion<string>();
     }
     // Definizione dei DbSet per le entità del database
     public DbSet<User> Users { get; set; }

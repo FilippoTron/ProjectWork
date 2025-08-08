@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectWork.DTO;
+using ProjectWork.Models;
 using ProjectWork.Services;
 
 namespace ProjectWork.Controllers;
@@ -76,8 +77,11 @@ public class LoanRequestController : ControllerBase
     [HttpPut("{id}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusDTO statusDto)
     {
-        await loanRequestService.UpdateLoanRequestStatusAsync(id, statusDto.Status);
+        if (!Enum.TryParse<Status>(statusDto.Status, true, out var status))
+        {
+            return BadRequest("Stato non valido.");
+        }
+        await loanRequestService.UpdateLoanRequestStatusAsync(id, status);
         return Ok("Stato della richiesta di prestito aggiornato con successo.");
     }
-
 }

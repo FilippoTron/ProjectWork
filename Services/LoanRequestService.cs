@@ -74,7 +74,7 @@ public class LoanRequestService : ILoanRequestService
             Importo = requestDto.Importo,
             TassoInteresse = tassoInteresse,
             Durata = requestDto.Durata,
-            Status = "In attesa",
+            Status = Status.Pendente,
             DataRichiesta = DateTime.UtcNow
         };
         _context.LoanRequests.Add(loanRequest);
@@ -83,13 +83,14 @@ public class LoanRequestService : ILoanRequestService
 
     }
 
-    public async Task<bool> UpdateLoanRequestStatusAsync(int id, string status)
+    public async Task<bool> UpdateLoanRequestStatusAsync(int id, Status status)
     {
         var loanRequest = await _context.LoanRequests.FirstOrDefaultAsync(lr => lr.Id == id);
         if (loanRequest == null)
         {
             throw new KeyNotFoundException($"Loan request with ID {id} not found.");
         }
+
         loanRequest.Status = status;
         _context.LoanRequests.Update(loanRequest);
         await _context.SaveChangesAsync();

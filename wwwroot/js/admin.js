@@ -1,5 +1,17 @@
 ﻿let allRequests = [];
 
+const loanStatusLabels = {
+    0: "Pendente",
+    1: "Approvata",
+    2: "Rifiutata"
+};
+
+const statusColors = {
+    "Pendente": "warning",
+    "Approvata": "success",
+    "Rifiutata": "danger"
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem("token");
     if (!token) return window.location.href = "login.html";
@@ -48,7 +60,9 @@ function renderTable(data) {
       <td>€ ${r.importo}</td>
       <td>${r.durata}</td>
       <td>€ ${rataMensile}</td>
-      <td>${r.status}</td>
+      <td><span class="badge bg-${statusColors[loanStatusLabels[r.status]]}">
+        ${loanStatusLabels[r.status]}
+    </span></td>
       <td>
         <button class="btn btn-success btn-sm me-1" onclick="updateStatus(${r.id}, 'Approvata')">✔</button>
         <button class="btn btn-danger btn-sm" onclick="updateStatus(${r.id}, 'Rifiutata')">✖</button>
@@ -64,6 +78,7 @@ function filterRequests() {
 }
 
 async function updateStatus(id, status) {
+    console.log("Inviando:", { status });
     try {
         const res = await fetch(`${apiUrl}/api/LoanRequest/${id}/status`, {
             method: "PUT",
@@ -95,11 +110,12 @@ function updateChart(data) {
     const count = {
         Approvata: 0,
         Rifiutata: 0,
-        "In attesa": 0
+        "Pendente": 0
     };
 
     data.forEach(r => {
-        count[r.status] = (count[r.status] || 0) + 1;
+        const status = loanStatusLabels[r.status]; // es: "Approvato"
+        count[status] = (count[status] || 0) + 1;
     });
 
     const ctx = document.getElementById("statusChart").getContext("2d");
@@ -108,9 +124,9 @@ function updateChart(data) {
     chartInstance = new Chart(ctx, {
         type: "pie",
         data: {
-            labels: ["Approvate", "Rifiutate", "In attesa"],
+            labels: ["Approvate", "Rifiutate", "Pendente"],
             datasets: [{
-                data: [count.Approvata, count.Rifiutata, count["In attesa"]],
+                data: [count.Approvata, count.Rifiutata, count["Pendente"]],
                 backgroundColor: ["#198754", "#dc3545", "#ffc107"]
             }]
         },
