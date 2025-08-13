@@ -1,11 +1,5 @@
 ﻿let allRequests = [];
 
-const loanStatusLabels = {
-    0: "Pendente",
-    1: "Approvata",
-    2: "Rifiutata"
-};
-
 const statusColors = {
     "Pendente": "warning",
     "Approvata": "success",
@@ -58,10 +52,11 @@ function renderTable(data) {
       <td>${r.id}</td>
       <td>${username}</td>
       <td>€ ${r.importo}</td>
+      <td>${r.tipoPrestito}</td>
       <td>${r.durata}</td>
       <td>€ ${rataMensile}</td>
-      <td><span class="badge bg-${statusColors[loanStatusLabels[r.status]]}">
-        ${loanStatusLabels[r.status]}
+      <td><span class="badge bg-${statusColors[r.status] || 'secondary'}">
+        ${r.status}
     </span></td>
       <td>
         <button class="btn btn-success btn-sm me-1" onclick="updateStatus(${r.id}, 'Approvata')">✔</button>
@@ -114,8 +109,7 @@ function updateChart(data) {
     };
 
     data.forEach(r => {
-        const status = loanStatusLabels[r.status]; // es: "Approvato"
-        count[status] = (count[status] || 0) + 1;
+        count[r.status] = (count[r.status] || 0) + 1;
     });
 
     const ctx = document.getElementById("statusChart").getContext("2d");

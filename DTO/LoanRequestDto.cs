@@ -10,6 +10,7 @@ public class LoanRequestDto
     public double Importo { get; set; } // Importo del prestito
     public double TassoInteresse { get; set; } // Tasso di interesse applicato al prestito
     public int Durata { get; set; } // Durata del prestito in mesi
+    public TipoPrestito TipoPrestito { get; set; } // Tipo di prestito (Personale, Veicolo, Abitazione, Altro)
     public Status Status { get; set; }
     public DateTime DataRichiesta { get; set; } // Data della richiesta di prestito
 }

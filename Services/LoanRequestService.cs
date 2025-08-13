@@ -29,6 +29,7 @@ public class LoanRequestService : ILoanRequestService
                 },
                 Importo = r.Importo,
                 TassoInteresse = r.TassoInteresse,
+                TipoPrestito = r.TipoPrestito,
                 Durata = r.Durata,
                 Status = r.Status,
                 DataRichiesta = r.DataRichiesta
@@ -55,6 +56,7 @@ public class LoanRequestService : ILoanRequestService
             },
             Importo = lr.Importo,
             TassoInteresse = lr.TassoInteresse,
+            TipoPrestito = lr.TipoPrestito,
             Durata = lr.Durata,
             Status = lr.Status,
             DataRichiesta = lr.DataRichiesta
@@ -67,13 +69,14 @@ public class LoanRequestService : ILoanRequestService
         if (requestDto.Importo <= 0 || requestDto.Durata <= 0)
             throw new ArgumentException("Importo e durata devono essere maggiori di zero.");
 
-        var tassoInteresse = CalcoloTassoInteresse(requestDto.Importo, requestDto.Durata);
+        var tassoInteresse = CalcoloTassoInteresse(requestDto.TipoPrestito);
         var loanRequest = new LoanRequest
         {
             UserId = userId,
             Importo = requestDto.Importo,
             TassoInteresse = tassoInteresse,
             Durata = requestDto.Durata,
+            TipoPrestito = Enum.TryParse<TipoPrestito>(requestDto.TipoPrestito, true, out var tipoPrestito) ? tipoPrestito : throw new ArgumentException("Tipo di prestito non valido"),
             Status = Status.Pendente,
             DataRichiesta = DateTime.UtcNow
         };
@@ -97,15 +100,22 @@ public class LoanRequestService : ILoanRequestService
         return true;
     }
 
-    public double CalcoloTassoInteresse(double importo, int durata)
+    public double CalcoloTassoInteresse(string tipoPrestito)
     {
-        if (importo <= 0 || durata <= 0)
-            throw new ArgumentException("Importo e durata devono essere maggiori di zero.");
-        else if (importo <= 5000 && durata <= 12)
-            return 3.5; // 5% interest for small loans
-        else if (importo <= 10000 && durata <= 24)
-            return 5.0;
+        if (Enum.TryParse<TipoPrestito>(tipoPrestito, true, out var tipo))
+        {
+            return tipo switch
+            {
+                TipoPrestito.Personale => 6.5,
+                TipoPrestito.Veicolo => 4.2,
+                TipoPrestito.Abitazione => 3.5,
+                TipoPrestito.Altro => 5.0,
+                _ => throw new ArgumentException("Tipo di prestito non valido")
+            };
+        }
         else
-            return 6.5;
+        {
+            throw new ArgumentException("Tipo di prestito non valido");
+        }
     }
 }

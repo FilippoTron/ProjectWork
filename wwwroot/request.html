@@ -47,6 +47,13 @@
         <h2>Invia la tua richiesta</h2>
         <div class="card mx-auto p-4 shadow" style="max-width: 500px;">
             <form id="loanRequestForm">
+                <select id="tipoPrestito" class="form-select mb-2" required>
+                    <option value="">Seleziona il Tipo di Prestito</option>
+                    <option value="Personale">Prestito Personale</option>
+                    <option value="Veicolo">Prestito Veicolo</option>
+                    <option value="Abitazione">Mutuo Casa</option>
+                    <option value="Altro">Altro</option>
+                </select>
                 <input type="number" step="0.01" id="importo" class="form-control mb-2" placeholder="Importo (€)" required />
                 <input type="number" id="durata" class="form-control mb-3" placeholder="Durata (mesi)" required />
                 <button type="submit" class="btn btn-primary w-100">Invia Richiesta</button>

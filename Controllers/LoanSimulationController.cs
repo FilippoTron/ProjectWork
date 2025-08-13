@@ -26,7 +26,7 @@ public class LoanSimulationController : ControllerBase
         }
         try
         {
-            var calcoloTasso = _loanRequestService.CalcoloTassoInteresse(request.Importo, request.Durata);
+            var calcoloTasso = _loanRequestService.CalcoloTassoInteresse(request.TipoPrestito);
             var rataMensile = loanCalculator.CalcoloRata(request.Importo, calcoloTasso, request.Durata);
             return Ok(new { RataMensile = rataMensile });
         }

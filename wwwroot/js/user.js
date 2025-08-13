@@ -38,6 +38,7 @@ async function fetchLoans() {
                         <td>${loan.id}</td>
                         <td><strong>€ ${loan.importo.toFixed(2)}</strong></td>
                         <td>${loan.durata} mesi</td>
+                        <td>${loan.tipoPrestito}</td>
                         <td><span class="badge bg-${statusClass}">${loan.status}</span></td>
                         <td>
                             <span data-bs-toggle="tooltip" title="${new Date(loan.dataRichiesta).toLocaleString()}">

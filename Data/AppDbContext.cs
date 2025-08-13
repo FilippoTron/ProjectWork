@@ -15,6 +15,9 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<LoanRequest>()
             .Property(lr => lr.Status)
             .HasConversion<string>();
+        modelBuilder.Entity<LoanRequest>()
+            .Property(lr => lr.TipoPrestito)
+            .HasConversion<string>();
     }
     // Definizione dei DbSet per le entità del database
     public DbSet<User> Users { get; set; }

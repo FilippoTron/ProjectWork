@@ -9,5 +9,5 @@ public interface ILoanRequestService
     Task<IEnumerable<LoanRequestDto>> GetLoanRequestByIdAsync(int id);
     Task<IEnumerable<LoanRequestDto>> GetAllLoanRequestsAsync();
     Task<bool> UpdateLoanRequestStatusAsync(int id, Status status);
-    double CalcoloTassoInteresse(double importo, int durata);
+    double CalcoloTassoInteresse(string tipoPrestito);
 }
