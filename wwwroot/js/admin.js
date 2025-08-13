@@ -45,12 +45,13 @@ function renderTable(data) {
     }
 
     data.forEach(r => {
-        const username = r.user?.username || "Utente sconosciuto";
+        const name = r.user?.name || "Utente sconosciuto";
+        const surname = r.user?.surname || "Utente sconosciuto";
         const rataMensile = (r.importo / r.durata).toFixed(2);
         const tr = document.createElement("tr");
         tr.innerHTML = `
       <td>${r.id}</td>
-      <td>${username}</td>
+      <td>${name} ${surname}</td>
       <td>€ ${r.importo}</td>
       <td>${r.tipoPrestito}</td>
       <td>${r.durata}</td>

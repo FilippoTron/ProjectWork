@@ -17,6 +17,7 @@ public class LoanRequestDto
 
 public class UserDto
 {
-    public string Username { get; set; } = string.Empty; // Nome utente
+    public string Name { get; set; } = string.Empty; // Nome dell'utente
+    public string Surname { get; set; } = string.Empty; // Cognome dell'utente
     public string Email { get; set; } = string.Empty; // Email dell'utente
 }

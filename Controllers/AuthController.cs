@@ -36,6 +36,14 @@ public class AuthController : ControllerBase
             Username = user.Username,
             Email = user.Email,
             Password = user.Password,
+            Name = user.Name,
+            Surname = user.Surname,
+            Indirizzo = user.Indirizzo,
+            Citta = user.Citta,
+            Provincia = user.Provincia,
+            Cap = user.Cap,
+            Telefono = user.Telefono,
+            DataNascita = user.DataNascita,
             Role = "User",
         };
         // Aggiungi il nuovo utente al database

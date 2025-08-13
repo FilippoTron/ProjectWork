@@ -24,7 +24,8 @@ public class LoanRequestService : ILoanRequestService
                 UserId = r.UserId,
                 User = new UserDto
                 {
-                    Username = r.User.Username,
+                    Name = r.User.Name,
+                    Surname = r.User.Surname,
                     Email = r.User.Email
                 },
                 Importo = r.Importo,
@@ -51,7 +52,8 @@ public class LoanRequestService : ILoanRequestService
             UserId = lr.UserId,
             User = new UserDto
             {
-                Username = lr.User.Username,
+                Name = lr.User.Name,
+                Surname = lr.User.Surname,
                 Email = lr.User.Email
             },
             Importo = lr.Importo,
