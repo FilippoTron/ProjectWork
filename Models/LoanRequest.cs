@@ -10,6 +10,7 @@ public class LoanRequest
     public int Durata { get; set; }
     public TipoPrestito TipoPrestito { get; set; }
     public Status Status { get; set; }
+    public string? Motivazione { get; set; }
     public DateTime DataRichiesta { get; set; } = DateTime.UtcNow;
 }
 

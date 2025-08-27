@@ -31,21 +31,25 @@ async function fetchLoans() {
 
         loans.forEach(loan => {
             const row = document.createElement("tr");
-
             const statusClass = statusColors[loan.status] || "secondary";
 
             row.innerHTML = `
-                        <td>${loan.id}</td>
-                        <td><strong>€ ${loan.importo.toFixed(2)}</strong></td>
-                        <td>${loan.durata} mesi</td>
-                        <td>${loan.tipoPrestito}</td>
-                        <td><span class="badge bg-${statusClass}">${loan.status}</span></td>
-                        <td>
-                            <span data-bs-toggle="tooltip" title="${new Date(loan.dataRichiesta).toLocaleString()}">
-                                ${new Date(loan.dataRichiesta).toLocaleDateString()}
-                            </span>
-                        </td>
-                    `;
+                <td>${loan.id}</td>
+                <td><strong>€ ${loan.importo.toFixed(2)}</strong></td>
+                <td>${loan.durata} mesi</td>
+                <td>${loan.tipoPrestito}</td>
+                <td>
+                    <a href="#" class="badge bg-${statusClass} text-decoration-none stato-link"
+                       data-motivazione="${loan.motivazione}">
+                       ${loan.status}
+                    </a>
+                </td>
+                <td>
+                    <span data-bs-toggle="tooltip" title="${new Date(loan.dataRichiesta).toLocaleString()}">
+                        ${new Date(loan.dataRichiesta).toLocaleDateString()}
+                    </span>
+                </td>
+            `;
             tbody.appendChild(row);
         });
 
@@ -90,6 +94,17 @@ document.getElementById("searchInput").addEventListener("input", function () {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(search) ? "" : "none";
     });
+});
+
+// Mostra motivazione in modale al click sullo stato
+document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("stato-link")) {
+        e.preventDefault();
+        const motivazione = e.target.getAttribute("data-motivazione") || "Nessuna motivazione disponibile.";
+        document.getElementById("motivazioneContent").innerText = motivazione;
+        const motivazioneModal = new bootstrap.Modal(document.getElementById("motivazioneModal"));
+        motivazioneModal.show();
+    }
 });
 
 fetchLoans();

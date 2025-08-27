@@ -2,5 +2,6 @@
 
 public class UpdateStatusDTO
 {
-    public string Status { get; set; } // Nuovo stato della richiesta di prestito
+    public string Status { get; set; } 
+    public string Motivazione { get; set; }
 }

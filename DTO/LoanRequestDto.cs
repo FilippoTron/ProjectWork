@@ -12,6 +12,7 @@ public class LoanRequestDto
     public int Durata { get; set; } // Durata del prestito in mesi
     public TipoPrestito TipoPrestito { get; set; } // Tipo di prestito (Personale, Veicolo, Abitazione, Altro)
     public Status Status { get; set; }
+    public string Motivazione { get; set; }
     public DateTime DataRichiesta { get; set; } // Data della richiesta di prestito
 }
 

@@ -40,13 +40,13 @@ function renderTable(data) {
     table.innerHTML = "";
 
     if (data.length === 0) {
-        table.innerHTML = `<tr><td colspan="7" class="text-center">Nessuna richiesta trovata.</td></tr>`;
+        table.innerHTML = `<tr><td colspan="8" class="text-center">Nessuna richiesta trovata.</td></tr>`;
         return;
     }
 
     data.forEach(r => {
         const name = r.user?.name || "Utente sconosciuto";
-        const surname = r.user?.surname || "Utente sconosciuto";
+        const surname = r.user?.surname || "";
         const rataMensile = (r.importo / r.durata).toFixed(2);
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -56,12 +56,10 @@ function renderTable(data) {
       <td>${r.tipoPrestito}</td>
       <td>${r.durata}</td>
       <td>€ ${rataMensile}</td>
-      <td><span class="badge bg-${statusColors[r.status] || 'secondary'}">
-        ${r.status}
-    </span></td>
+      <td><span class="badge bg-${statusColors[r.status] || 'secondary'}">${r.status}</span></td>
       <td>
-        <button class="btn btn-success btn-sm me-1" onclick="updateStatus(${r.id}, 'Approvata')">✔</button>
-        <button class="btn btn-danger btn-sm" onclick="updateStatus(${r.id}, 'Rifiutata')">✖</button>
+        <button class="btn btn-success btn-sm me-1" onclick="askMotivation(${r.id}, 'Approvata')">✔</button>
+        <button class="btn btn-danger btn-sm" onclick="askMotivation(${r.id}, 'Rifiutata')">✖</button>
       </td>`;
         table.appendChild(tr);
     });
@@ -73,45 +71,58 @@ function filterRequests() {
     renderTable(filtered);
 }
 
-async function updateStatus(id, status) {
-    console.log("Inviando:", { status });
+// ====== MODAL E MOTIVAZIONE ======
+let selectedRequestId = null;
+let selectedStatus = null;
+const motivationModal = new bootstrap.Modal(document.getElementById("motivationModal"));
+
+function askMotivation(id, status) {
+    selectedRequestId = id;
+    selectedStatus = status;
+    document.getElementById("motivationText").value = "";
+    motivationModal.show();
+}
+
+document.getElementById("confirmMotivationBtn").addEventListener("click", async () => {
+    const motivation = document.getElementById("motivationText").value.trim();
+    if (!motivation) {
+        alert("Inserisci una motivazione.");
+        return;
+    }
+
     try {
-        const res = await fetch(`${apiUrl}/api/LoanRequest/${id}/status`, {
+        const res = await fetch(`${apiUrl}/api/LoanRequest/${selectedRequestId}/status`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + localStorage.getItem("token")
             },
-            body: JSON.stringify({ status })
+            body: JSON.stringify({ status: selectedStatus, Motivazione : motivation })
         });
 
-        if (!res.ok) return alert("Errore nell'aggiornamento");
+        if (!res.ok) {
+            alert("Errore nell'aggiornamento");
+            return;
+        }
 
-        await fetchRequests(); // ricarica
+        motivationModal.hide();
+        await fetchRequests();
     } catch (err) {
         alert("Errore connessione.");
     }
-}
+});
 
+// ====== LOGOUT ======
 function logout() {
     localStorage.removeItem("token");
     window.location.href = "login.html";
 }
 
-// ==================== GRAFICO ====================
-
+// ====== GRAFICO ======
 let chartInstance;
-
 function updateChart(data) {
-    const count = {
-        Approvata: 0,
-        Rifiutata: 0,
-        "Pendente": 0
-    };
-
-    data.forEach(r => {
-        count[r.status] = (count[r.status] || 0) + 1;
-    });
+    const count = { Approvata: 0, Rifiutata: 0, "Pendente": 0 };
+    data.forEach(r => { count[r.status] = (count[r.status] || 0) + 1; });
 
     const ctx = document.getElementById("statusChart").getContext("2d");
     if (chartInstance) chartInstance.destroy();
@@ -126,9 +137,7 @@ function updateChart(data) {
             }]
         },
         options: {
-            plugins: {
-                legend: { position: "bottom" }
-            }
+            plugins: { legend: { position: "bottom" } }
         }
     });
 }

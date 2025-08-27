@@ -33,6 +33,7 @@ public class LoanRequestService : ILoanRequestService
                 TipoPrestito = r.TipoPrestito,
                 Durata = r.Durata,
                 Status = r.Status,
+                Motivazione = r.Motivazione,
                 DataRichiesta = r.DataRichiesta
             }).ToListAsync();
         return loanRequests;
@@ -61,6 +62,7 @@ public class LoanRequestService : ILoanRequestService
             TipoPrestito = lr.TipoPrestito,
             Durata = lr.Durata,
             Status = lr.Status,
+            Motivazione = lr.Motivazione,
             DataRichiesta = lr.DataRichiesta
 
         });
@@ -88,7 +90,7 @@ public class LoanRequestService : ILoanRequestService
 
     }
 
-    public async Task<bool> UpdateLoanRequestStatusAsync(int id, Status status)
+    public async Task<bool> UpdateLoanRequestStatusAsync(int id, Status status, string motivazione)
     {
         var loanRequest = await _context.LoanRequests.FirstOrDefaultAsync(lr => lr.Id == id);
         if (loanRequest == null)
@@ -97,6 +99,7 @@ public class LoanRequestService : ILoanRequestService
         }
 
         loanRequest.Status = status;
+        loanRequest.Motivazione = motivazione;
         _context.LoanRequests.Update(loanRequest);
         await _context.SaveChangesAsync();
         return true;

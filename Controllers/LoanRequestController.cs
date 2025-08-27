@@ -77,11 +77,12 @@ public class LoanRequestController : ControllerBase
     [HttpPut("{id}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusDTO statusDto)
     {
+        var motivazione = statusDto.Motivazione;
         if (!Enum.TryParse<Status>(statusDto.Status, true, out var status))
         {
             return BadRequest("Stato non valido.");
         }
-        await loanRequestService.UpdateLoanRequestStatusAsync(id, status);
+        await loanRequestService.UpdateLoanRequestStatusAsync(id, status, motivazione);
         return Ok("Stato della richiesta di prestito aggiornato con successo.");
     }
 }

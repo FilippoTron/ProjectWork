@@ -49,6 +49,26 @@
         <div id="adminMsg" class="text-danger mt-3 fw-bold"></div>
     </div>
 
+    <!-- MODAL MOTIVAZIONE -->
+    <div class="modal fade" id="motivationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Inserisci motivazione</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="motivationText" class="form-control" rows="4" placeholder="Scrivi qui la motivazione..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-primary" id="confirmMotivationBtn">Conferma</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/config.js"></script>
     <script src="js/admin.js"></script>
 </body>
