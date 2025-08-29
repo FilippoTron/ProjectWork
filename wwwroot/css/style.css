@@ -1,0 +1,26 @@
+﻿/* Stile globale applicato a tutte le pagine */
+body {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background: url('../images/finance.jpg') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+}
+h1, h3 {
+    color: white;
+}
+
+h2 {
+    color:white;
+    text-align:center;
+    margin:20px;
+}
+/* Overlay per rendere leggibile il contenuto */
+.overlay {
+    background-color: rgba(0, 30, 60, 0.75);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
