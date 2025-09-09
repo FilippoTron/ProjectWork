@@ -14,6 +14,7 @@ public class LoanRequestDto
     public Status Status { get; set; }
     public string Motivazione { get; set; }
     public DateTime DataRichiesta { get; set; } // Data della richiesta di prestito
+    public List<DocumentDTO> Documents { get; set; } = new(); // Documenti associati alla richiesta di prestito
 }
 
 public class UserDto

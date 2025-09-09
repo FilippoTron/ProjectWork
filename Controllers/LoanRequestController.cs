@@ -17,9 +17,11 @@ public class LoanRequestController : ControllerBase
     {
         this.loanRequestService = loanRequestService;
     }
+
+
     [Authorize(Roles = "User")]
     [HttpPost("submit")]
-    public async Task<IActionResult> SubmitLoanRequest([FromBody] SubmitRequestDto requestDto)
+    public async Task<IActionResult> SubmitLoanRequest([FromForm] SubmitRequestDto requestDto)
     {
         if (requestDto == null || requestDto.Importo <= 0 || requestDto.Durata <= 0)
         {
@@ -84,5 +86,28 @@ public class LoanRequestController : ControllerBase
         }
         await loanRequestService.UpdateLoanRequestStatusAsync(id, status, motivazione);
         return Ok("Stato della richiesta di prestito aggiornato con successo.");
+    }
+
+    [HttpPost("uploadDocuments/{loanRequestId}")]
+    public async Task<IActionResult> UploadDocument(int loanRequestId, [FromForm] List<IFormFile> files)
+    {
+        if (files == null || files.Count == 0)
+        {
+            return BadRequest("Nessun file selezionato.");
+        }
+        try
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            await loanRequestService.UploadDocumentAsync(loanRequestId, files, userId);
+            return Ok(new { message = $"{files.Count} documenti caricati correttamente." });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Errore durante il caricamento del documento: {ex.Message}");
+        }
     }
 }

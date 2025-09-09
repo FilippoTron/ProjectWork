@@ -10,4 +10,5 @@ public interface ILoanRequestService
     Task<IEnumerable<LoanRequestDto>> GetAllLoanRequestsAsync();
     Task<bool> UpdateLoanRequestStatusAsync(int id, Status status, string motivazione);
     double CalcoloTassoInteresse(string tipoPrestito);
+    Task UploadDocumentAsync(int loanRequestId, List<IFormFile> file, int userId);
 }

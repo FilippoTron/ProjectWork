@@ -18,6 +18,7 @@ public class LoanRequestService : ILoanRequestService
     {
         var loanRequests = await _context.LoanRequests.
             Include(r => r.User)
+            .Include(r => r.Documents)
             .Select(r => new LoanRequestDto
             {
                 Id = r.Id,
@@ -34,7 +35,12 @@ public class LoanRequestService : ILoanRequestService
                 Durata = r.Durata,
                 Status = r.Status,
                 Motivazione = r.Motivazione,
-                DataRichiesta = r.DataRichiesta
+                DataRichiesta = r.DataRichiesta,
+                Documents = r.Documents.Select(d => new DocumentDTO
+                {
+                    FilePath = d.FilePath,
+                    FileName = d.FileName,
+                }).ToList()
             }).ToListAsync();
         return loanRequests;
     }
@@ -43,6 +49,7 @@ public class LoanRequestService : ILoanRequestService
     {
         var loanRequest = await _context.LoanRequests
             .Include(r => r.User)
+            .Include(r => r.Documents)
             .Where(r => r.UserId == id).ToListAsync();
         if (loanRequest == null || !loanRequest.Any())
             throw new KeyNotFoundException($"Loan request with ID {id} not found.");
@@ -63,7 +70,12 @@ public class LoanRequestService : ILoanRequestService
             Durata = lr.Durata,
             Status = lr.Status,
             Motivazione = lr.Motivazione,
-            DataRichiesta = lr.DataRichiesta
+            DataRichiesta = lr.DataRichiesta,
+            Documents = lr.Documents.Select(d => new DocumentDTO
+            {
+                FilePath = d.FilePath,
+                FileName = d.FileName,
+            }).ToList()
 
         });
     }
@@ -73,21 +85,63 @@ public class LoanRequestService : ILoanRequestService
         if (requestDto.Importo <= 0 || requestDto.Durata <= 0)
             throw new ArgumentException("Importo e durata devono essere maggiori di zero.");
 
-        var tassoInteresse = CalcoloTassoInteresse(requestDto.TipoPrestito);
-        var loanRequest = new LoanRequest
-        {
-            UserId = userId,
-            Importo = requestDto.Importo,
-            TassoInteresse = tassoInteresse,
-            Durata = requestDto.Durata,
-            TipoPrestito = Enum.TryParse<TipoPrestito>(requestDto.TipoPrestito, true, out var tipoPrestito) ? tipoPrestito : throw new ArgumentException("Tipo di prestito non valido"),
-            Status = Status.Pendente,
-            DataRichiesta = DateTime.UtcNow
-        };
-        _context.LoanRequests.Add(loanRequest);
-        await _context.SaveChangesAsync();
-        return true;
+        if (requestDto.Documents == null || !requestDto.Documents.Any())
+            throw new ArgumentException("Devi caricare almeno un documento prima di inviare la richiesta.");
 
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            var loanRequest = new LoanRequest
+            {
+                UserId = userId,
+                Importo = requestDto.Importo,
+                Durata = requestDto.Durata,
+                TipoPrestito = Enum.TryParse<TipoPrestito>(requestDto.TipoPrestito, true, out var tipoPrestito)
+                    ? tipoPrestito
+                    : throw new ArgumentException("Tipo di prestito non valido"),
+                TassoInteresse = CalcoloTassoInteresse(requestDto.TipoPrestito),
+                Status = Status.Pendente,
+                DataRichiesta = DateTime.UtcNow,
+                Documents = new List<Document>()
+            };
+
+            var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            if (!Directory.Exists(uploadPath))
+            {
+                Directory.CreateDirectory(uploadPath);
+            }
+
+            // Salvo i documenti allegati
+            foreach (var file in requestDto.Documents)
+            {
+                var uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
+                var filePath = Path.Combine(uploadPath, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                loanRequest.Documents.Add(new Document
+                {
+                    FileName = file.FileName,
+                    FilePath = $"/uploads/{uniqueFileName}", // percorso relativo per frontend
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+
+            _context.LoanRequests.Add(loanRequest);
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return true;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<bool> UpdateLoanRequestStatusAsync(int id, Status status, string motivazione)
@@ -123,4 +177,42 @@ public class LoanRequestService : ILoanRequestService
             throw new ArgumentException("Tipo di prestito non valido");
         }
     }
+
+    public async Task UploadDocumentAsync(int loanRequestId, List<IFormFile> files, int userId)
+    {
+        var loanRequest = await _context.LoanRequests.Include(lr => lr.Documents).FirstOrDefaultAsync(lr => lr.Id == loanRequestId);
+        if (loanRequest == null)
+        {
+            throw new KeyNotFoundException($"Richiesta con id {loanRequest.Id} non trovata");
+        }
+        if (loanRequest.UserId != userId)
+        {
+            throw new UnauthorizedAccessException("Non sei autorizzato a caricare documenti per questa richiesta.");
+        }
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        if (!Directory.Exists(uploadsFolder))
+        {
+            Directory.CreateDirectory(uploadsFolder);
+        }
+        foreach (var file in files)
+        {
+            var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetExtension(file.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var document = new Document
+            {
+                LoanRequestId = loanRequestId,
+                FilePath = $"/uploads/{uniqueFileName}",
+                FileName = file.FileName,
+                UpdatedAt = DateTime.UtcNow
+            };
+            _context.Documents.Add(document);
+        }
+        await _context.SaveChangesAsync();
+    }
+
 }

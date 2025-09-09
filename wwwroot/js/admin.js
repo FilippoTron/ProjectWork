@@ -48,6 +48,9 @@ function renderTable(data) {
         const name = r.user?.name || "Utente sconosciuto";
         const surname = r.user?.surname || "";
         const rataMensile = (r.importo / r.durata).toFixed(2);
+        const documentsLinks = r.documents && r.documents.length
+            ? r.documents.map(d => `<a href="${d.filePath}" target="_blank">${d.fileName}</a>`).join("<br>")
+            : "Nessun documento";
         const tr = document.createElement("tr");
         tr.innerHTML = `
       <td>${r.id}</td>
@@ -57,6 +60,7 @@ function renderTable(data) {
       <td>${r.durata}</td>
       <td>€ ${rataMensile}</td>
       <td><span class="badge bg-${statusColors[r.status] || 'secondary'}">${r.status}</span></td>
+      <td>${documentsLinks}</td>
       <td>
         <button class="btn btn-success btn-sm me-1" onclick="askMotivation(${r.id}, 'Approvata')">✔</button>
         <button class="btn btn-danger btn-sm" onclick="askMotivation(${r.id}, 'Rifiutata')">✖</button>

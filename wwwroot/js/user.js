@@ -32,6 +32,19 @@ async function fetchLoans() {
         loans.forEach(loan => {
             const row = document.createElement("tr");
             const statusClass = statusColors[loan.status] || "secondary";
+            const docCell = document.createElement("td");
+            if (loan.documents && loan.documents.length > 0) {
+                loan.documents.forEach(doc => {
+                    const link = document.createElement("a");
+                    link.href = doc.filePath;
+                    link.target = "_blank";
+                    link.textContent = doc.fileName;
+                    link.className = "d-block";
+                    docCell.appendChild(link);
+                });
+            } else {
+                docCell.textContent = "Nessun documento";
+            }
 
             row.innerHTML = `
                 <td>${loan.id}</td>
@@ -50,6 +63,7 @@ async function fetchLoans() {
                     </span>
                 </td>
             `;
+            row.appendChild(docCell);
             tbody.appendChild(row);
         });
 

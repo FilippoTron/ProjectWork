@@ -9,9 +9,10 @@ public class LoanRequest
     public double TassoInteresse { get; set; }
     public int Durata { get; set; }
     public TipoPrestito TipoPrestito { get; set; }
-    public Status Status { get; set; }
+    public Status Status { get; set; } = Status.AttesaDocumenti;
     public string? Motivazione { get; set; }
     public DateTime DataRichiesta { get; set; } = DateTime.UtcNow;
+    public List<Document> Documents { get; set; } = new();
 }
 
 public enum TipoPrestito
@@ -26,5 +27,6 @@ public enum Status
 {
     Pendente,
     Approvata,
-    Rifiutata
+    Rifiutata,
+    AttesaDocumenti
 }

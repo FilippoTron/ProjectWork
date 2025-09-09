@@ -1,12 +1,9 @@
 ﻿namespace ProjectWork.DTO;
 
-public class SubmitRequestDto
+public class CreateLoanRequestDTO
 {
-    public int Id { get; set; }
     public double Importo { get; set; } // Importo del prestito
     public int Durata { get; set; } // Durata del prestito in mesi
     public string TipoPrestito { get; set; } // Tipo di prestito (Personale, Veicolo, Abitazione, Altro)
-    public DateTime DataRichiesta { get; set; }
-    public List<IFormFile> Documents { get; set; }
-
+    public DateTime DataRichiesta { get; set; } = DateTime.UtcNow;
 }

@@ -22,4 +22,5 @@ public class AppDbContext : DbContext
     // Definizione dei DbSet per le entità del database
     public DbSet<User> Users { get; set; }
     public DbSet<LoanRequest> LoanRequests { get; set; }
+    public DbSet<Document> Documents { get; set; }
 }
