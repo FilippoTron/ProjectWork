@@ -10,6 +10,13 @@ const statusColors = {
     "Rifiutato": "danger",
     "Pendente": "warning"
 };
+function calcolaRataMensile(importo, durataMesi, tassoAnnuale) {
+    const i = (tassoAnnuale / 100) / 12; // tasso mensile
+    if (i === 0) return (importo / durataMesi).toFixed(2); // caso interesse 0%
+
+    const rata = importo * (i / (1 - Math.pow(1 + i, -durataMesi)));
+    return rata.toFixed(2);
+}
 
 async function fetchLoans() {
     const spinner = document.getElementById("loadingSpinner");
@@ -30,6 +37,7 @@ async function fetchLoans() {
         const loans = await res.json();
 
         loans.forEach(loan => {
+            const rataMensile = calcolaRataMensile(loan.importo, loan.durata, loan.tassoInteresse) || "N/D"; 
             const row = document.createElement("tr");
             const statusClass = statusColors[loan.status] || "secondary";
             const docCell = document.createElement("td");
@@ -51,6 +59,7 @@ async function fetchLoans() {
                 <td><strong>€ ${loan.importo.toFixed(2)}</strong></td>
                 <td>${loan.durata} mesi</td>
                 <td>${loan.tipoPrestito}</td>
+                <td>€ ${rataMensile}</td>
                 <td>
                     <a href="#" class="badge bg-${statusClass} text-decoration-none stato-link"
                        data-motivazione="${loan.motivazione}">

@@ -34,6 +34,13 @@ async function fetchRequests() {
         document.getElementById("adminMsg").textContent = "Errore nel caricamento delle richieste.";
     }
 }
+function calcolaRataMensile(importo, durataMesi, tassoAnnuale) {
+    const i = (tassoAnnuale / 100) / 12; // tasso mensile
+    if (i === 0) return (importo / durataMesi).toFixed(2); // caso interesse 0%
+
+    const rata = importo * (i / (1 - Math.pow(1 + i, -durataMesi)));
+    return rata.toFixed(2);
+}
 
 function renderTable(data) {
     const table = document.getElementById("requestTable");
@@ -47,7 +54,7 @@ function renderTable(data) {
     data.forEach(r => {
         const name = r.user?.name || "Utente sconosciuto";
         const surname = r.user?.surname || "";
-        const rataMensile = (r.importo / r.durata).toFixed(2);
+        const rataMensile = calcolaRataMensile(r.importo, r.durata, r.tassoInteresse) || "N/D";
         const documentsLinks = r.documents && r.documents.length
             ? r.documents.map(d => `<a href="${d.filePath}" target="_blank">${d.fileName}</a>`).join("<br>")
             : "Nessun documento";
