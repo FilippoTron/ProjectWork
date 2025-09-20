@@ -78,6 +78,16 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<AppDbContext>(options =>
    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy => policy
+        .WithOrigins("https://localhost:7194", "http://localhost:5013")
+        .AllowAnyHeader()
+        .AllowCredentials()
+        .AllowAnyMethod()
+        );
+});
 var app = builder.Build();
 
 app.UseDefaultFiles();
@@ -93,9 +103,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-
+app.UseCors("AllowFrontend");
 app.UseRouting();
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 

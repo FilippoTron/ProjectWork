@@ -10,10 +10,10 @@ const statusColors = {
     "Rifiutato": "danger",
     "Pendente": "warning"
 };
+
 function calcolaRataMensile(importo, durataMesi, tassoAnnuale) {
     const i = (tassoAnnuale / 100) / 12; // tasso mensile
-    if (i === 0) return (importo / durataMesi).toFixed(2); // caso interesse 0%
-
+    if (i === 0) return (importo / durataMesi).toFixed(2); // interesse 0%
     const rata = importo * (i / (1 - Math.pow(1 + i, -durataMesi)));
     return rata.toFixed(2);
 }
@@ -36,11 +36,17 @@ async function fetchLoans() {
 
         const loans = await res.json();
 
+        if (!loans.length) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center">Nessuna richiesta disponibile.</td></tr>`;
+            return;
+        }
+
         loans.forEach(loan => {
-            const rataMensile = calcolaRataMensile(loan.importo, loan.durata, loan.tassoInteresse) || "N/D"; 
+            const rataMensile = calcolaRataMensile(loan.importo, loan.durata, loan.tassoInteresse) || "N/D";
             const row = document.createElement("tr");
             const statusClass = statusColors[loan.status] || "secondary";
             const docCell = document.createElement("td");
+
             if (loan.documents && loan.documents.length > 0) {
                 loan.documents.forEach(doc => {
                     const link = document.createElement("a");
@@ -82,7 +88,7 @@ async function fetchLoans() {
         });
 
     } catch (err) {
-        errorMsg.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+        console.error(err); // Log per debug, senza mostrare errore all'utente
     } finally {
         spinner.classList.add("d-none");
     }
@@ -96,14 +102,9 @@ function parseJwt(token) {
     }
 }
 
-document.getElementById("simulateBtn").addEventListener("click", () => {
-    window.location.href = "loan.html";
-});
-
-document.getElementById("requestBtn").addEventListener("click", () => {
-    window.location.href = "request.html";
-});
-
+// Event listener navigazione
+document.getElementById("simulateBtn").addEventListener("click", () => window.location.href = "loan.html");
+document.getElementById("requestBtn").addEventListener("click", () => window.location.href = "request.html");
 document.getElementById("logoutBtn").addEventListener("click", () => {
     if (confirm("Sei sicuro di voler uscire?")) {
         localStorage.removeItem("token");
@@ -111,6 +112,7 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
     }
 });
 
+// Ricerca live
 document.getElementById("searchInput").addEventListener("input", function () {
     const search = this.value.toLowerCase();
     document.querySelectorAll("#loanTableBody tr").forEach(row => {
